@@ -1,5 +1,8 @@
 package FigureClass;
 
+/**
+ * @apiNote Треугольник
+ */
 public class Triangle implements Figure {
     private int a;
     private int b;
@@ -20,5 +23,10 @@ public class Triangle implements Figure {
     @Override
     public int perimeter() {
         return a + b + c;
+    }
+
+
+    public static boolean checkTriangle(int a, int b, int c){
+        return a < b + c && a > b - c &&  b < a + c && b > a - c && c < a + b && c > a - b;
     }
 }

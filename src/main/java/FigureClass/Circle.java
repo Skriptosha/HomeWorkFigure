@@ -1,5 +1,8 @@
 package FigureClass;
 
+/**
+ * Круг
+ */
 public class Circle implements Figure {
     private int r;
 

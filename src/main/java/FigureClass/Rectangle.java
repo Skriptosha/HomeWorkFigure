@@ -1,5 +1,8 @@
 package FigureClass;
 
+/**
+ * Прямоугольник
+ */
 public class Rectangle implements Figure {
     private int a;
     private int b;

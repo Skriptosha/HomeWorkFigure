@@ -1,5 +1,8 @@
 package FigureClass;
 
+/**
+ * Квадрат
+ */
 public class Square implements Figure {
     private int a;
 

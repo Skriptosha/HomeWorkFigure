@@ -9,7 +9,12 @@ public class Main {
     private static final String Rectangle = "R";
     private static final String Circle = "C";
     private static final String EXIT = "Q";
-    private static String s;
+    private static final String Area = "S";
+    private static final String Perimeter = "P";
+    private static final String Text1 = "Не соблюдается правило треугольника: Любая сторона треугольника " +
+            "меньше суммы двух других сторон и больше\n" +
+            "их разности";
+    private static final String TextExit = "Для возврата в предыдущее меню нажмите \"" + EXIT + "\"";
     private static Scanner scanner;
 
     public static void main(String[] args) {
@@ -20,30 +25,36 @@ public class Main {
         int[] param;
         scanner = new Scanner(System.in);
         Figure figure;
+        String s;
         do {
             help();
             s = scanner.next();
-            switch (s.toUpperCase()) {
+            out : switch (s.toUpperCase()) {
                 case Triangle: {
-                    param = construct(Triangle.class);
+                    do {
+                        if ((param = construct(Triangle.class)) == null) break out;
+                        if (!FigureClass.Triangle.checkTriangle(param[0], param[1], param[2]))
+                            System.out.println(Text1);
+                        else break;
+                    } while (true);
                     figure = new Triangle(param[0], param[1], param[2]);
                     calculate(figure);
                     break;
                 }
                 case Square: {
-                    param = construct(Square.class);
+                    if ((param = construct(Square.class)) == null) break;
                     figure = new Square(param[0]);
                     calculate(figure);
                     break;
                 }
                 case Rectangle: {
-                    param = construct(Rectangle.class);
+                    if ((param = construct(Rectangle.class)) == null) break;
                     figure = new Rectangle(param[0], param[1]);
                     calculate(figure);
                     break;
                 }
                 case Circle: {
-                    param = construct(Circle.class);
+                    if ((param = construct(Circle.class)) == null) break;
                     figure = new Circle(param[0]);
                     calculate(figure);
                     break;
@@ -62,10 +73,12 @@ public class Main {
     }
 
     private int[] construct(Class figure) {
+        String s;
         int[] param;
         int c = 0;
         String pattern = "\\d*";
         System.out.println("Введите стороны для фигуры: " + figure.getSimpleName());
+        System.out.println(TextExit);
         Field[] fields = figure.getDeclaredFields();
         param = new int[fields.length];
         for (Field cl : fields) {
@@ -75,6 +88,9 @@ public class Main {
                 if (s.matches(pattern)) {
                     param[c] = Integer.parseInt(s);
                     break;
+                }
+                if (s.equalsIgnoreCase("Q")) {
+                    return null;
                 }
             }
             c++;
@@ -87,15 +103,15 @@ public class Main {
         do {
             help2();
             s = scanner.next();
-            if (s.equalsIgnoreCase("S")) System.out.println("Площадь фигуры равна: " + figure.square());
-            if (s.equalsIgnoreCase("P")) System.out.println("Периметр фигуры равен: " + figure.perimeter());
+            if (s.equalsIgnoreCase(Area)) System.out.println("Площадь фигуры равна: " + figure.square());
+            if (s.equalsIgnoreCase(Perimeter)) System.out.println("Периметр фигуры равен: " + figure.perimeter());
         } while (!s.equalsIgnoreCase(EXIT));
     }
 
     private void help2() {
-        System.out.println("Для вычисления площади нажмите S: " + "\n" +
-                "Для вычисления площади нажмите P: " + "\n" +
-                "Для возврата в предыдущее меню нажмите \"" + EXIT + "\"");
+        System.out.println("Для вычисления площади нажмите " + Area + " : " + "\n" +
+                "Для вычисления площади нажмите " + Perimeter + " : " + "\n" +
+                TextExit);
     }
 }
 
