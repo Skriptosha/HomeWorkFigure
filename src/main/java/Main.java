@@ -21,6 +21,10 @@ public class Main {
         new Main().run();
     }
 
+    /**
+     * Основной метод для вывода в консоль
+     * Выбор фигуры происходит через оператор switch
+     */
     private void run() {
         int[] param;
         scanner = new Scanner(System.in);
@@ -63,6 +67,9 @@ public class Main {
         } while (!s.equalsIgnoreCase(EXIT));
     }
 
+    /**
+     * Меню выбора фигуры
+     */
     private void help() {
         System.out.println("Выбирите фигуру: " + "\n" +
                 "Треуголькик: \"" + Triangle + "\"" + "\n" +
@@ -72,7 +79,13 @@ public class Main {
                 "Для выхода нажмите \"" + EXIT + "\"");
     }
 
-    private int[] construct(Class figure) {
+    /**
+     * Метод для получения аргументов для конструкторов фигур (использует java.lang.reflect)
+     *
+     * @param figure Класс фигуры, реализующей интерфейс Figure
+     * @return массив значений для полей класса фигуры
+     */
+    private int[] construct(Class <? extends Figure> figure) {
         String s;
         int[] param;
         int c = 0;
@@ -98,6 +111,11 @@ public class Main {
         return param;
     }
 
+    /**
+     * Метод для вычисления площади и периметра фигур
+     *
+     * @param figure Ссылка на обьект фигуры типа Figure
+     */
     private void calculate(Figure figure) {
         String s;
         do {
@@ -108,9 +126,12 @@ public class Main {
         } while (!s.equalsIgnoreCase(EXIT));
     }
 
+    /**
+     * Меню для выбора типа вычисления
+     */
     private void help2() {
         System.out.println("Для вычисления площади нажмите " + Area + " : " + "\n" +
-                "Для вычисления площади нажмите " + Perimeter + " : " + "\n" +
+                "Для вычисления периметра нажмите " + Perimeter + " : " + "\n" +
                 TextExit);
     }
 }

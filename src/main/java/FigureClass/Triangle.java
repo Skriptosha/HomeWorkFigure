@@ -1,7 +1,7 @@
 package FigureClass;
 
 /**
- * @apiNote Треугольник
+ * Треугольник
  */
 public class Triangle implements Figure {
     private int a;
@@ -26,6 +26,14 @@ public class Triangle implements Figure {
     }
 
 
+    /**
+     * Проверяем введеные стороны на возможность построения из них треугольника
+     *
+     * @param a сторона а
+     * @param b сторона б
+     * @param c сторона с
+     * @return тру, если это треугольник, фалс в других случаях
+     */
     public static boolean checkTriangle(int a, int b, int c){
         return a < b + c && a > b - c &&  b < a + c && b > a - c && c < a + b && c > a - b;
     }
