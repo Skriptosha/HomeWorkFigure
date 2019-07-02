@@ -1,11 +1,16 @@
 package FigureClass;
 
 
+import Annotation.FigureFieldInfo;
+import Annotation.FigureInfo;
+
 /**
  * Квадрат
  */
-@FigureInfo(nameFigure = "Квадрат", shortNameFigure = "S", NumberOfArgs = 1)
+@FigureInfo(figureName = "Квадрат", figureShortName = "S", NumberOfArgs = 1)
 public class Square implements Figure {
+
+    @FigureFieldInfo(fieldName = "Сторона квадрата")
     private int a;
 
     public Square(int ... args) {

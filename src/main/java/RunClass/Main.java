@@ -1,16 +1,20 @@
 package RunClass;
 
+import Annotation.FigureFieldInfo;
+import Annotation.FigureInfo;
 import FigureClass.Figure;
-import FigureClass.FigureInfo;
 
 import java.lang.reflect.Field;
 import java.util.Scanner;
 
 public class Main {
+
     static final String TriangleClassName = "Triangle";
     static final String SquareClassName = "Square";
     static final String RectangleClassName = "Rectangle";
     static final String CircleClassName = "Circle";
+
+
     static final String EXIT = "Q";
     static final String Area = "S";
     static final String Perimeter = "P";
@@ -29,10 +33,10 @@ public class Main {
      */
     void help() throws ClassNotFoundException {
         System.out.println("Выбирите фигуру: " + "\n" +
-                "Треуголькик: \"" + getFigureAnnotation(TriangleClassName) + "\"" + "\n" +
-                "Квадрат: \"" + getFigureAnnotation(SquareClassName) + "\"" + "\n" +
-                "Прямоугольник \"" + getFigureAnnotation(RectangleClassName) + "\"" + "\n" +
-                "Круг \"" + getFigureAnnotation(CircleClassName) + "\"" + "\n" +
+                "Треуголькик: \"" + getFigureAnnotation(TriangleClassName).figureShortName() + "\"" + "\n" +
+                "Квадрат: \"" + getFigureAnnotation(SquareClassName).figureShortName() + "\"" + "\n" +
+                "Прямоугольник \"" + getFigureAnnotation(RectangleClassName).figureShortName() + "\"" + "\n" +
+                "Круг \"" + getFigureAnnotation(CircleClassName).figureShortName() + "\"" + "\n" +
                 "Для выхода нажмите \"" + EXIT + "\"");
     }
 
@@ -64,20 +68,21 @@ public class Main {
         int[] param;
         int c = 0;
         String pattern = "\\d*";
-        System.out.println("Введите стороны для фигуры: "
-                + figure.getDeclaredAnnotation(FigureInfo.class).nameFigure());
+        System.out.println("Необходимо задать параметры для фигуры: "
+                + figure.getDeclaredAnnotation(FigureInfo.class).figureName());
         System.out.println(TextExit);
         Field[] fields = figure.getDeclaredFields();
         param = new int[fields.length];
         for (Field cl : fields) {
             while (true) {
-                System.out.println("Введите значение для стороны \"" + cl.getName() + "\" : ");
+                System.out.println("Введите значение для параметра: \""
+                        + cl.getDeclaredAnnotation(FigureFieldInfo.class).fieldName() + "\" : ");
                 s = scanner.next();
                 if (s.matches(pattern)) {
                     param[c] = Integer.parseInt(s);
                     break;
                 }
-                if (s.equalsIgnoreCase("Q")) {
+                if (s.equalsIgnoreCase(EXIT)) {
                     return null;
                 }
             }

@@ -1,12 +1,19 @@
 package FigureClass;
 
 
+import Annotation.FigureFieldInfo;
+import Annotation.FigureInfo;
+
 /**
  * Прямоугольник
  */
-@FigureInfo(nameFigure = "Прямоугольник", shortNameFigure = "R", NumberOfArgs = 2)
+@FigureInfo(figureName = "Прямоугольник", figureShortName = "R", NumberOfArgs = 2)
 public class Rectangle implements Figure {
+
+    @FigureFieldInfo(fieldName = "Длина прямоугольника")
     private int a;
+
+    @FigureFieldInfo(fieldName = "Ширина прямоугольника")
     private int b;
 
     public Rectangle(int ... args) {

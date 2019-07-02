@@ -1,11 +1,16 @@
 package FigureClass;
 
 
+import Annotation.FigureFieldInfo;
+import Annotation.FigureInfo;
+
 /**
  * Круг
  */
-@FigureInfo(nameFigure = "Круг", shortNameFigure = "C", NumberOfArgs = 1)
+@FigureInfo(figureName = "Круг", figureShortName = "C", NumberOfArgs = 1)
 public class Circle implements Figure {
+
+    @FigureFieldInfo(fieldName = "Радиус круга")
     private int r;
 
     public Circle(int ... args) {

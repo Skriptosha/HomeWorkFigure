@@ -19,41 +19,36 @@ public class RunClassSwitch extends Main {
         do {
             help();
             s = scanner.next();
-            out : switch (s.toUpperCase()) {
-                case T: {
-                    do {
-                        if ((param = construct(Triangle.class)) == null) break out;
-                        if (!Triangle.checkTriangle(param[0], param[1], param[2]))
-                            System.out.println(Text1);
-                        else break;
-                    } while (true);
-                    figure = new Triangle(param[0], param[1], param[2]);
-                    calculate(figure);
-                    break;
-                }
-                case SquareClassName: {
-                    if ((param = construct(Square.class)) == null) break;
-                    figure = new Square(param[0]);
-                    calculate(figure);
-                    break;
-                }
-                case RectangleClassName: {
-                    if ((param = construct(Rectangle.class)) == null) break;
-                    figure = new Rectangle(param[0], param[1]);
-                    calculate(figure);
-                    break;
-                }
-                case CircleClassName: {
-                    if ((param = construct(Circle.class)) == null) break;
-                    figure = new Circle(param[0]);
-                    calculate(figure);
-                    break;
-                }
+            out:
+            if (s.equalsIgnoreCase(getFigureAnnotation(TriangleClassName).figureShortName())) {
+                do {
+                    if ((param = construct(Triangle.class)) == null) break out;
+                    if (!Triangle.checkTriangle(param))
+                        System.out.println(Text1);
+                    else break;
+                } while (true);
+                figure = new Triangle(param);
+                calculate(figure);
+                break;
+            } else if (s.equalsIgnoreCase(getFigureAnnotation(SquareClassName).figureShortName())) {
+                if ((param = construct(Square.class)) == null) break;
+                figure = new Square(param);
+                calculate(figure);
+                break;
+            } else if (s.equalsIgnoreCase(getFigureAnnotation(RectangleClassName).figureShortName())) {
+                if ((param = construct(Rectangle.class)) == null) break;
+                figure = new Rectangle(param);
+                calculate(figure);
+                break;
+            } else if (s.equalsIgnoreCase(getFigureAnnotation(CircleClassName).figureShortName())) {
+                if ((param = construct(Circle.class)) == null) break;
+                figure = new Circle(param);
+                calculate(figure);
+                break;
             }
+
         } while (!s.equalsIgnoreCase(EXIT));
     }
-
-
 
 
 }

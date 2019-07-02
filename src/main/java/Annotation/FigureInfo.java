@@ -1,4 +1,4 @@
-package FigureClass;
+package Annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,16 +12,16 @@ public @interface FigureInfo {
     /**
      * Имя фигуры
      *
-     * @return Имя фигуры типа Стринг
+     * @return Имя фигуры типа String
      */
-    String nameFigure();
+    String figureName();
 
     /**
      * Короткое имя для обозначения фигуры
      *
-     * @return Короткое имя фигуры типа Стринг
+     * @return Короткое имя фигуры типа String
      */
-    String shortNameFigure();
+    String figureShortName();
 
     /**
      * Число аргументов для контруктора
