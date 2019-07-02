@@ -1,13 +1,15 @@
 package FigureClass;
 
+
 /**
  * Квадрат
  */
+@FigureInfo(nameFigure = "Квадрат", shortNameFigure = "S", NumberOfArgs = 1)
 public class Square implements Figure {
     private int a;
 
-    public Square(int a) {
-        this.a = a;
+    public Square(int ... args) {
+        this.a = args[0];
     }
 
     @Override

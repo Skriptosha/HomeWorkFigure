@@ -1,13 +1,15 @@
 package FigureClass;
 
+
 /**
  * Круг
  */
+@FigureInfo(nameFigure = "Круг", shortNameFigure = "C", NumberOfArgs = 1)
 public class Circle implements Figure {
     private int r;
 
-    public Circle(int r) {
-        this.r = r;
+    public Circle(int ... args) {
+        this.r = args[0];
     }
 
     @Override
