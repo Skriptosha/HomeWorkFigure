@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface FigureFieldInfo {
 
     /**
-     * Указываем название поля класса
+     * Указываем название поля класса согласно фразе: "Введите значение для параметра: " + fieldName
      *
      * @return Название поля типа String
      */
