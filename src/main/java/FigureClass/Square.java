@@ -1,6 +1,7 @@
 package FigureClass;
 
 
+import Annotation.FigureAdditionalMethod;
 import Annotation.FigureFieldInfo;
 import Annotation.FigureInfo;
 import Annotation.FigureMainMethod;
@@ -28,5 +29,10 @@ public class Square implements Figure {
     @FigureMainMethod(methodName = "Периметра", methodShortName = "P")
     public int perimeter() {
         return 4*a;
+    }
+
+    @FigureAdditionalMethod(methodName = "test")
+    public static void test(){
+        System.out.println("this test");
     }
 }

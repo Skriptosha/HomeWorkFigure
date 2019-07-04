@@ -21,8 +21,9 @@ public class Main {
 
     private static HashMap<String, Class<? extends Figure>> figureClasses = new HashMap<>();
     private static HashMap<String, Method> figureMethods = new HashMap<>();
+    private static final String PACKAGE = Figure.class.getPackage().toString().split(" ")[1];
     private static final String REGEX = ".java";
-    private static final String FIGURE_CLASS_PATH = "src\\main\\java\\FigureClass";
+    private static final String FIGURE_CLASS_PATH = "src\\main\\java\\" + PACKAGE;
     static final String EXIT = "Q";
     private static final String TEXT_EXIT = "Для возврата в предыдущее меню нажмите \"" + EXIT + "\"";
 
@@ -37,20 +38,23 @@ public class Main {
 
     /**
      * Статический блок для получения списка классов по пути FIGURE_CLASS_PATH.
-     * При получении береться список всех файлов - далее отбираются файлы с расширением REGEX
-     * далее отбираются классы имеющие аннотацию FigureInfo, методы которых имеют аннотацию FigureMainMethod,
-     * и поля с аннотацией FigureFieldInfo. Эти классы уже попадают в HashMap figureClasses,
-     * где ключом является поле figureShortName() аннотации FigureInfo
-     * , а значением класс типа Class<? extends Figure>
+     * При получении береться список файлов из пакета FIGURE_CLASS_PATH - фильтруются файлы с расширением REGEX
+     * далее отбираются классы совместимые с Figure.class, имеющие аннотацию FigureInfo,
+     * методы которых имеют аннотацию FigureMainMethod, и поля с аннотацию FigureFieldInfo.
+     * Эти классы уже попадают в HashMap figureClasses, где ключом является поле figureShortName()
+     * аннотации FigureInfo, а значением класс типа Class<? extends Figure>
      */
     static {
         try {
-            Object[] paths = Files.list(Paths.get(FIGURE_CLASS_PATH)).toArray();
-            for (Object object : paths) {
-                Path path = (Path) object;
-                if (path.toString().endsWith(REGEX)) {
+            // берем только файлы с расширением REGEX
+            Path[] paths = Files.list(Paths.get(FIGURE_CLASS_PATH)).
+                    filter(p -> p.getFileName().toString().endsWith(REGEX)).toArray(Path[]::new);
+            for (Path path : paths) {
+                // проверяем что нужный класс найден, и реализует интерфейс Figure
+                if (Figure.class.isAssignableFrom(getFigureClass(path.getFileName().toString().split(REGEX)[0]))) {
                     Class<? extends Figure> clazz = getFigureClass(path.getFileName().toString().split(REGEX)[0])
                             .asSubclass(Figure.class);
+                    // проверяем наличие необходимых аннотаций
                     if (clazz.isAnnotationPresent(FigureInfo.class)
                             && isHaveAnnotation(clazz.getDeclaredMethods(), FigureMainMethod.class)
                             && isHaveAnnotation(clazz.getDeclaredFields(), FigureFieldInfo.class)) {
@@ -117,9 +121,8 @@ public class Main {
     void help() throws ClassNotFoundException {
         System.out.println("Выбирите фигуру: ");
         for (Map.Entry<String, Class<? extends Figure>> entry : figureClasses.entrySet()) {
-            System.out.println("Для выбора фигуры \"" +
-                    getFigureAnnotation(entry.getValue().getSimpleName()).figureName() +
-                    "\" нажмите \"" + entry.getKey() + "\"");
+            System.out.printf("Для выбора фигуры \"%s\" нажмите \"%s\" \n",
+                    getFigureAnnotation(entry.getValue().getSimpleName()).figureName(), entry.getKey());
         }
         System.out.println("Для выхода нажмите " + EXIT);
     }
@@ -134,7 +137,7 @@ public class Main {
      *                                FigureClass или ошибка в названии класса.
      */
     static Class<?> getFigureClass(String className) throws ClassNotFoundException {
-        return Class.forName("FigureClass." + className);
+        return Class.forName(PACKAGE + "." + className);
     }
 
     /**
@@ -165,21 +168,23 @@ public class Main {
         int[] param;
         int c = 0;
         String pattern = "\\d*";
-        System.out.println("Необходимо задать параметры для фигуры: \""
-                + figure.getDeclaredAnnotation(FigureInfo.class).figureName() + "\"");
+        System.out.printf("Необходимо задать параметры для фигуры: \"%s\" \n",
+                figure.getDeclaredAnnotation(FigureInfo.class).figureName());
         System.out.println(TEXT_EXIT);
         Field[] fields = figure.getDeclaredFields();
         param = new int[fields.length];
         for (Field cl : fields) {
             if (cl.isAnnotationPresent(FigureFieldInfo.class)) {
                 while (true) {
-                    System.out.println("Введите значение для параметра: \""
-                            + cl.getDeclaredAnnotation(FigureFieldInfo.class).fieldName() + "\" : ");
+                    System.out.printf("Введите значение для параметра: \"%s\" : \n",
+                            cl.getDeclaredAnnotation(FigureFieldInfo.class).fieldName());
                     s = scanner.next();
+                    // сверяем введеное значение согласно pattern
                     if (s.matches(pattern)) {
                         param[c] = Integer.parseInt(s);
                         break;
                     }
+                    // выход
                     if (s.equalsIgnoreCase(EXIT)) {
                         return null;
                     }
@@ -191,7 +196,7 @@ public class Main {
     }
 
     /**
-     * Метод для вычисления методов, отмеченных аннотацией FigureMainMethod
+     * Метод для вычисления методов, отмеченных аннотацией @FigureMainMethod
      * Так же есть возможность в любой момент отменить ввод, нажав - EXIT
      * По ключу вызывается метод из HashMap figureMethods
      *
@@ -204,7 +209,7 @@ public class Main {
             help2(methods);
             s = scanner.next().toUpperCase();
             if (figureMethods.containsKey(s)){
-                System.out.println("Результат: " + figureMethods.get(s).invoke(figure,  null));
+                System.out.printf("Результат: %s \n", figureMethods.get(s).invoke(figure));
             }
 
         }while (!s.equalsIgnoreCase(EXIT));
@@ -223,11 +228,11 @@ public class Main {
             if (method.isAnnotationPresent(FigureMainMethod.class)){
                 FigureMainMethod fm = method.getDeclaredAnnotation(FigureMainMethod.class);
                 figureMethods.put(fm.methodShortName(), method);
-                System.out.println("Для вычисления \"" + fm.methodName()
-                        + "\" нажмите \"" + fm.methodShortName() + "\"");
+                System.out.printf("Для вычисления \"%s\" нажмите \"%s\" \n",
+                        fm.methodName(), fm.methodShortName());
             }
-            System.out.println(TEXT_EXIT);
         }
+        System.out.println(TEXT_EXIT);
     }
 }
 

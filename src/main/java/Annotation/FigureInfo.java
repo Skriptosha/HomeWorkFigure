@@ -10,7 +10,8 @@ import java.lang.annotation.Target;
 public @interface FigureInfo {
 
     /**
-     * Имя фигуры
+     * Имя фигуры согласно фразе: "Необходимо задать параметры для фигуры: figureName" и
+     * "Выбирите фигуру: figureName"
      *
      * @return Имя фигуры типа String
      */

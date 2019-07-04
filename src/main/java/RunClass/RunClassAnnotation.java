@@ -4,19 +4,22 @@ import Annotation.FigureAdditionalMethod;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class RunClassAnnotation extends Main {
-
+    private final String BAD_RETURN_TYPE = "Метод должен иметь возвращаемый тип boolean или void";
 
     /**
-     * Основной метод для вывода в консоль
+     * Основной метод для вывода в консоль (расширяет класс Main)
      * Выбор фигуры происходит через аннотации и рефлексию
      * Если класс содержит метод, отмеченный аннотацией FigureAdditionalMethod он так же будет обработан
-     * есть два варианта обработки - с блокированием дальнейшего выполнения, пока не будет выполнено условие,
-     * или без блокирования
+     * есть два варианта обработки - с блокированием дальнейшего выполнения, попадает в массив blockMethods,
+     * пока не будет выполнено условие, или без блокирования, попадает в массив voidMethods,
+     * (зависит от типа возвращаемого значения метода - для блокировки нужен boolean)
+     * Сначала выполняются методы с блокировкой, потом методы без блокировки
      *
-     * @throws ClassNotFoundException
+     * @throws ClassNotFoundException кинет из help() -> Main.getFigureAnnotation -> Main.getFigureClass
      */
     void run() throws ClassNotFoundException {
         scanner = new Scanner(System.in);
@@ -28,27 +31,36 @@ public class RunClassAnnotation extends Main {
                 out:
                 if (getFigureClasses().containsKey(s)) {
                     int[] param = null;
-                    Method[] methods = getFigureClasses().get(s).getDeclaredMethods();
-                    for (Method m : methods) {
-                        if (m.isAnnotationPresent(FigureAdditionalMethod.class)) {
-                            FigureAdditionalMethod an = m.getDeclaredAnnotation(FigureAdditionalMethod.class);
-                            do {
-                                if (m.getParameterCount() > 0 && param == null)
-                                    param = construct(getFigureClasses().get(s));
-                                if (param == null) break out;
-                                else if (an.isBlock() && (boolean) getFigureClasses().get(s).getMethod(m.getName()
-                                        , an.argsClass()).invoke(getFigureClasses().get(s), param)) {
-                                    param = null;
-                                    break;
-                                }
-                                else if (!an.isBlock()) {
-                                    getFigureClasses().get(s).getMethod(m.getName(), an.argsClass())
-                                            .invoke(getFigureClasses().get(s), param);
-                                    break;
-                                }
-                            } while (true);
-                        }
+
+                    // фильтруем массив по аннотации @FigureAdditionalMethod
+                    Method[] methods = Arrays.stream(getFigureClasses().get(s).getDeclaredMethods())
+                            .filter(m -> m.isAnnotationPresent(FigureAdditionalMethod.class))
+                            .toArray(Method[]::new);
+
+                    // фильтруем массив по методам с возвращаемым типом boolean
+                    Method[] blockMethods = Arrays.stream(methods)
+                            .filter(m -> m.getReturnType().equals(boolean.class))
+                            .toArray(Method[]::new);
+
+                    for (Method m : blockMethods) {
+                        do {
+                            param = construct(getFigureClasses().get(s));
+                            if (param == null) break out;
+                        } while (!runAdditionalMethod(s, m, param));
                     }
+
+                    // фильтруем массив по методам с возвращаемым типом void
+                    Method[] voidMethods = Arrays.stream(methods)
+                            .filter(m -> m.getReturnType().equals(void.class))
+                            .toArray(Method[]::new);
+
+                    for (Method m : voidMethods) {
+                        param = param == null ? construct(getFigureClasses().get(s)) : param;
+                        if (param == null) break out;
+                        runAdditionalMethod(s, m, param);
+                    }
+
+                    //запускаем метод по выполнению методом с аннотацией @FigureMainMethod
                     calculate(getFigureClasses().get(s).getDeclaredConstructor(int[].class)
                             .newInstance(param == null ? construct(getFigureClasses().get(s)) : param));
                 }
@@ -57,6 +69,39 @@ public class RunClassAnnotation extends Main {
                 e.printStackTrace();
             }
         } while (!s.equalsIgnoreCase(EXIT));
+    }
+
+    /**
+     * Запуск метода с аннотацией @FigureAdditionalMethod, происходит через invoke.
+     * Метод может либо принимать входящие параметры, либо быть без параметров,
+     * если метод типа void - runAdditionalMethod вернет false и в параметре int[] param
+     * можно отправлять все что угодно, входящие параметры проверяются через getParameterCount()
+     *
+     * Не работает прием null в методе .invoke через оператор ? :, поэтому пришлось разделить.
+     *
+     * @param s ключ для HashMap FigureClasses
+     * @param m метод который надо вызвать
+     * @param param список входящих параметров int[] для метода m
+     * @return если метод m возвращает boolean, то вернет то же, что и метод m,
+     * если метод m void - то false
+     *
+     */
+    private boolean runAdditionalMethod(String s, Method m, int[] param)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Object ob;
+        // если метод принимает какие-то параметры
+        if (m.getParameterCount() != 0 ) {
+             ob = getFigureClasses().get(s).getMethod(m.getName(),
+                    m.getParameterCount() == 0 ? null : m.getParameterTypes())
+                    .invoke(getFigureClasses().get(s),
+                            param);
+        } else {
+            //если метод не принимает ничего
+            ob = getFigureClasses().get(s).getMethod(m.getName(),
+                    m.getParameterCount() == 0 ? null : m.getParameterTypes())
+                    .invoke(getFigureClasses().get(s));
+        }
+        return ob != null && (boolean) ob;
     }
 
 

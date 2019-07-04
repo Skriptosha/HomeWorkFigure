@@ -49,8 +49,7 @@ public class Triangle implements Figure {
      * @param args int[] параметров треугольника
      * @return тру, если это треугольник, фалс в других случаях
      */
-
-    @FigureAdditionalMethod(methodName = "checkTriangle", argsClass = int[].class, isBlock = true)
+    @FigureAdditionalMethod(methodName = "checkTriangle")
     public static boolean checkTriangle(int ... args){
         if (args.length < 3) throw new ArrayIndexOutOfBoundsException("Для конструктора необходимо 3 параметра!");
         boolean b = args[0] < args[1] + args[2] && args[0] > args[1] - args[2] && args[1] < args[0] + args[2]
@@ -59,7 +58,7 @@ public class Triangle implements Figure {
         return b;
     }
 
-    @FigureAdditionalMethod(methodName = "isIsosceles", argsClass = int[].class, isBlock = false)
+    @FigureAdditionalMethod(methodName = "isIsosceles")
     public static void isIsosceles(int ... args) {
         if (args.length < 3) throw new ArrayIndexOutOfBoundsException("Для конструктора необходимо 3 параметра!");
         if (args[0] == args[1] || args[0] == args[2] || args[1] == args[2])
