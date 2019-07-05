@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -20,7 +21,6 @@ import java.util.Scanner;
 public class Main {
 
     private static HashMap<String, Class<? extends Figure>> figureClasses = new HashMap<>();
-    private static HashMap<String, Method> figureMethods = new HashMap<>();
     private static final String PACKAGE = Figure.class.getPackage().toString().split(" ")[1];
     private static final String REGEX = ".java";
     private static final String FIGURE_CLASS_PATH = "src\\main\\java\\" + PACKAGE;
@@ -38,7 +38,7 @@ public class Main {
 
     /**
      * Статический блок для получения списка классов по пути FIGURE_CLASS_PATH.
-     * При получении береться список файлов из пакета FIGURE_CLASS_PATH - фильтруются файлы с расширением REGEX
+     * При получении береться список файлов из пакета FIGURE_CLASS_PATH - фильтруются файлы с расширением REGEX,
      * далее отбираются классы совместимые с Figure.class, имеющие аннотацию FigureInfo,
      * методы которых имеют аннотацию FigureMainMethod, и поля с аннотацию FigureFieldInfo.
      * Эти классы уже попадают в HashMap figureClasses, где ключом является поле figureShortName()
@@ -58,8 +58,7 @@ public class Main {
                     if (clazz.isAnnotationPresent(FigureInfo.class)
                             && isHaveAnnotation(clazz.getDeclaredMethods(), FigureMainMethod.class)
                             && isHaveAnnotation(clazz.getDeclaredFields(), FigureFieldInfo.class)) {
-                        FigureInfo an = clazz.getDeclaredAnnotation(FigureInfo.class);
-                        figureClasses.put(an.figureShortName(), clazz);
+                        figureClasses.put(clazz.getDeclaredAnnotation(FigureInfo.class).figureShortName(), clazz);
                     }
                 }
             }
@@ -174,6 +173,7 @@ public class Main {
         Field[] fields = figure.getDeclaredFields();
         param = new int[fields.length];
         for (Field cl : fields) {
+            // классы могут содержать не только поля, отмеченные аннотацией
             if (cl.isAnnotationPresent(FigureFieldInfo.class)) {
                 while (true) {
                     System.out.printf("Введите значение для параметра: \"%s\" : \n",
@@ -204,9 +204,11 @@ public class Main {
      */
     void calculate(Figure figure) throws InvocationTargetException, IllegalAccessException {
         String s;
-        Method[] methods = figure.getClass().getDeclaredMethods();
+        HashMap<String, Method> figureMethods;
+        Method[] methods = Arrays.stream(figure.getClass().getDeclaredMethods())
+                .filter(m -> m.isAnnotationPresent(FigureMainMethod.class)).toArray(Method[]::new);
         do {
-            help2(methods);
+            figureMethods = help2(methods);
             s = scanner.next().toUpperCase();
             if (figureMethods.containsKey(s)){
                 System.out.printf("Результат: %s \n", figureMethods.get(s).invoke(figure));
@@ -223,16 +225,16 @@ public class Main {
      * Далее заполняется HashMap figureMethods, где ключ - это FigureMainMethod.methodShortName(),
      * а значение - Method данного класса.
      */
-    private void help2(Method[] methods) {
+    private HashMap<String, Method> help2(Method[] methods) {
+        HashMap<String, Method> figureMethods = new HashMap<>();
         for (Method method : methods){
-            if (method.isAnnotationPresent(FigureMainMethod.class)){
                 FigureMainMethod fm = method.getDeclaredAnnotation(FigureMainMethod.class);
                 figureMethods.put(fm.methodShortName(), method);
                 System.out.printf("Для вычисления \"%s\" нажмите \"%s\" \n",
                         fm.methodName(), fm.methodShortName());
-            }
         }
         System.out.println(TEXT_EXIT);
+        return figureMethods;
     }
 }
 

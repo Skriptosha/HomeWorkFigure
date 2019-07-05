@@ -2,10 +2,10 @@ package RunClass;
 
 import Annotation.FigureAdditionalMethod;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Scanner;
 
 public class RunClassAnnotation extends Main {
     private final String BAD_RETURN_TYPE = "Метод должен иметь возвращаемый тип boolean или void";
@@ -22,7 +22,7 @@ public class RunClassAnnotation extends Main {
      * @throws ClassNotFoundException кинет из help() -> Main.getFigureAnnotation -> Main.getFigureClass
      */
     void run() throws ClassNotFoundException {
-        scanner = new Scanner(System.in);
+        Class<? extends Annotation> AnnoForRunMethod = FigureAdditionalMethod.class;
         String s;
         do {
             help();
@@ -32,14 +32,10 @@ public class RunClassAnnotation extends Main {
                 if (getFigureClasses().containsKey(s)) {
                     int[] param = null;
 
-                    // фильтруем массив по аннотации @FigureAdditionalMethod
-                    Method[] methods = Arrays.stream(getFigureClasses().get(s).getDeclaredMethods())
-                            .filter(m -> m.isAnnotationPresent(FigureAdditionalMethod.class))
-                            .toArray(Method[]::new);
-
                     // фильтруем массив по методам с возвращаемым типом boolean
-                    Method[] blockMethods = Arrays.stream(methods)
-                            .filter(m -> m.getReturnType().equals(boolean.class))
+                    Method[] blockMethods = Arrays.stream(getFigureClasses().get(s).getDeclaredMethods())
+                            .filter(m -> (m.isAnnotationPresent(AnnoForRunMethod)
+                                    && m.getReturnType().equals(boolean.class)))
                             .toArray(Method[]::new);
 
                     for (Method m : blockMethods) {
@@ -50,8 +46,9 @@ public class RunClassAnnotation extends Main {
                     }
 
                     // фильтруем массив по методам с возвращаемым типом void
-                    Method[] voidMethods = Arrays.stream(methods)
-                            .filter(m -> m.getReturnType().equals(void.class))
+                    Method[] voidMethods = Arrays.stream(getFigureClasses().get(s).getDeclaredMethods())
+                            .filter(m -> (m.isAnnotationPresent(AnnoForRunMethod)
+                                    && m.getReturnType().equals(void.class)))
                             .toArray(Method[]::new);
 
                     for (Method m : voidMethods) {
@@ -97,8 +94,7 @@ public class RunClassAnnotation extends Main {
                             param);
         } else {
             //если метод не принимает ничего
-            ob = getFigureClasses().get(s).getMethod(m.getName(),
-                    m.getParameterCount() == 0 ? null : m.getParameterTypes())
+            ob = getFigureClasses().get(s).getMethod(m.getName())
                     .invoke(getFigureClasses().get(s));
         }
         return ob != null && (boolean) ob;
