@@ -72,8 +72,6 @@ public class RunClassAnnotation extends Main {
      * и типом возвращаемого значения boolean.
      * Если метод не принимает параметров, int[] param должен быть равен null
      *
-     * Не работает прием null в методе .invoke через оператор ? :, поэтому пришлось разделить.
-     *
      * @param clazz Class для обьекта фигуры который используем (из мапы FigureClasses)
      * @param m метод который надо вызвать
      * @param param список входящих параметров int[] для метода m
