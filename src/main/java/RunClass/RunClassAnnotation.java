@@ -2,24 +2,25 @@ package RunClass;
 
 import Annotation.FigureAdditionalMethod;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Scanner;
+import java.util.Arrays;
 
 public class RunClassAnnotation extends Main {
-
+    private final String BAD_RETURN_TYPE = "Метод должен иметь возвращаемый тип boolean или void";
 
     /**
-     * Основной метод для вывода в консоль
+     * Основной метод для вывода в консоль (расширяет класс Main)
      * Выбор фигуры происходит через аннотации и рефлексию
      * Если класс содержит метод, отмеченный аннотацией FigureAdditionalMethod он так же будет обработан
-     * есть два варианта обработки - с блокированием дальнейшего выполнения, пока не будет выполнено условие,
-     * или без блокирования
-     *
-     * @throws ClassNotFoundException
+     * есть два варианта обработки - с блокированием дальнейшего выполнения, попадает в массив blockMethods,
+     * пока не будет выполнено условие, или без блокирования, попадает в массив voidMethods,
+     * (зависит от типа возвращаемого значения метода - для блокировки нужен boolean)
+     * Сначала выполняются методы с блокировкой, потом методы без блокировки
      */
-    void run() throws ClassNotFoundException {
-        scanner = new Scanner(System.in);
+    void run() {
+        Class<? extends Annotation> AnnoForRunMethod = FigureAdditionalMethod.class;
         String s;
         do {
             help();
@@ -28,29 +29,35 @@ public class RunClassAnnotation extends Main {
                 out:
                 if (getFigureClasses().containsKey(s)) {
                     int[] param = null;
-                    Method[] methods = getFigureClasses().get(s).getDeclaredMethods();
-                    for (Method m : methods) {
-                        if (m.isAnnotationPresent(FigureAdditionalMethod.class)) {
-                            FigureAdditionalMethod an = m.getDeclaredAnnotation(FigureAdditionalMethod.class);
-                            do {
-                                if (m.getParameterCount() > 0 && param == null)
-                                    param = construct(getFigureClasses().get(s));
-                                if (param == null) break out;
-                                else if (an.isBlock() && (boolean) getFigureClasses().get(s).getMethod(m.getName()
-                                        , an.argsClass()).invoke(getFigureClasses().get(s), param)) {
-                                    param = null;
-                                    break;
-                                }
-                                else if (!an.isBlock()) {
-                                    getFigureClasses().get(s).getMethod(m.getName(), an.argsClass())
-                                            .invoke(getFigureClasses().get(s), param);
-                                    break;
-                                }
-                            } while (true);
-                        }
+                    Class<?> clazz = getFigureClasses().get(s);
+                    // фильтруем массив по методам с возвращаемым типом boolean
+                    Method[] blockMethods = Arrays.stream(clazz.getDeclaredMethods())
+                            .filter(m -> (m.isAnnotationPresent(AnnoForRunMethod)
+                                    && m.getReturnType().equals(boolean.class)))
+                            .toArray(Method[]::new);
+
+                    for (Method m : blockMethods) {
+                        do {
+                            param = construct(clazz);
+                            if (param == null) break out;
+                        } while (!runAdditionalMethod(clazz, m, param));
                     }
-                    calculate(getFigureClasses().get(s).getDeclaredConstructor(int[].class)
-                            .newInstance(param == null ? construct(getFigureClasses().get(s)) : param));
+
+                    // фильтруем массив по методам с возвращаемым типом void
+                    Method[] voidMethods = Arrays.stream(clazz.getDeclaredMethods())
+                            .filter(m -> (m.isAnnotationPresent(AnnoForRunMethod)
+                                    && m.getReturnType().equals(void.class)))
+                            .toArray(Method[]::new);
+
+                    for (Method m : voidMethods) {
+                        param = param == null ? construct(clazz) : param;
+                        if (param == null) break out;
+                        runAdditionalMethodVoid(clazz, m, param);
+                    }
+
+                    //запускаем метод по выполнению методов с аннотацией @FigureMainMethod
+                    calculate(clazz.getDeclaredConstructor(int[].class)
+                            .newInstance(param == null ? construct(clazz) : param));
                 }
             } catch (InstantiationException | InvocationTargetException
                     | IllegalAccessException | NoSuchMethodException e) {
@@ -59,5 +66,36 @@ public class RunClassAnnotation extends Main {
         } while (!s.equalsIgnoreCase(EXIT));
     }
 
+    /**
+     * Запуск метода с аннотацией @FigureAdditionalMethod, происходит через invoke.
+     * Версия для метода @FigureAdditionalMethod с вхордящими параметрами типа int[] param
+     * и типом возвращаемого значения boolean.
+     * Если метод не принимает параметров, int[] param должен быть равен null
+     *
+     * @param clazz Class для обьекта фигуры который используем (из мапы FigureClasses)
+     * @param m метод который надо вызвать
+     * @param param список входящих параметров int[] для метода m
+     * @return тип boolean, вернет то же, что и метод m
+     *
+     */
+    private boolean runAdditionalMethod(Class<?> clazz, Method m, int[] param)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        return (boolean) clazz.getMethod(m.getName(), m.getParameterCount() == 0 ? null : m.getParameterTypes())
+                    .invoke(clazz, m.getParameterCount() == 0 ? null : param);
+    }
 
+    /**
+     * Версия для метода @FigureAdditionalMethod с вхордящими параметрами типа int[] param
+     * и типом возвращаемого значения void. (ничего не возвращает)
+     * Если метод не принимает параметров, int[] param должен быть равен null
+     *
+     * @param clazz clazz Class для обьекта фигуры который используем (из мапы FigureClasses)
+     * @param m метод который надо вызвать
+     * @param param список входящих параметров int[] для метода m
+     */
+    private void runAdditionalMethodVoid(Class<?> clazz, Method m, int[] param)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        clazz.getMethod(m.getName(), m.getParameterCount() == 0 ? null : m.getParameterTypes())
+                .invoke(clazz, m.getParameterCount() == 0 ? null : param);
+        }
 }

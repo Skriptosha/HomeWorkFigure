@@ -37,7 +37,7 @@ public class Rectangle implements Figure {
         return 2*(a + b);
     }
 
-    @FigureAdditionalMethod(methodName = "isSquare", argsClass = int[].class, isBlock = false)
+    @FigureAdditionalMethod(methodName = "isSquare")
     public static void isSquare(int ... args){
         if (args.length < 2) throw new ArrayIndexOutOfBoundsException("Для конструктора необходимо 3 параметра!");
         if (args[0] == args[1]) System.out.println("Стороны равны, данная фигура является квадратом!");
