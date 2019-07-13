@@ -117,9 +117,8 @@ public class Main {
     void help() throws ClassNotFoundException {
         System.out.println("Выбирите фигуру: ");
         for (Map.Entry<String, Class<? extends Figure>> entry : figureClasses.entrySet()) {
-            System.out.println("Для выбора фигуры \"" +
-                    getFigureAnnotation(entry.getValue().getSimpleName()).figureName() +
-                    "\" нажмите \"" + entry.getKey() + "\"");
+            System.out.printf("Для выбора фигуры \"%s\" нажмите \"%s\" \n"
+                    , getFigureAnnotation(entry.getValue().getSimpleName()).figureName(), entry.getKey());
         }
         System.out.println("Для выхода нажмите " + EXIT);
     }
@@ -165,16 +164,16 @@ public class Main {
         int[] param;
         int c = 0;
         String pattern = "\\d*";
-        System.out.println("Необходимо задать параметры для фигуры: \""
-                + figure.getDeclaredAnnotation(FigureInfo.class).figureName() + "\"");
+        System.out.printf("Необходимо задать параметры для фигуры: \"%s\" + \n"
+                , figure.getDeclaredAnnotation(FigureInfo.class).figureName());
         System.out.println(TEXT_EXIT);
         Field[] fields = figure.getDeclaredFields();
         param = new int[fields.length];
         for (Field cl : fields) {
             if (cl.isAnnotationPresent(FigureFieldInfo.class)) {
                 while (true) {
-                    System.out.println("Введите значение для параметра: \""
-                            + cl.getDeclaredAnnotation(FigureFieldInfo.class).fieldName() + "\" : ");
+                    System.out.printf("Введите значение для параметра: \"%s\" : \n"
+                            , cl.getDeclaredAnnotation(FigureFieldInfo.class).fieldName());
                     s = scanner.next();
                     if (s.matches(pattern)) {
                         param[c] = Integer.parseInt(s);
@@ -204,7 +203,7 @@ public class Main {
             help2(methods);
             s = scanner.next().toUpperCase();
             if (figureMethods.containsKey(s)){
-                System.out.println("Результат: " + figureMethods.get(s).invoke(figure,  null));
+                System.out.println("Результат: " + figureMethods.get(s).invoke(figure, (Object[]) null));
             }
 
         }while (!s.equalsIgnoreCase(EXIT));
@@ -223,11 +222,11 @@ public class Main {
             if (method.isAnnotationPresent(FigureMainMethod.class)){
                 FigureMainMethod fm = method.getDeclaredAnnotation(FigureMainMethod.class);
                 figureMethods.put(fm.methodShortName(), method);
-                System.out.println("Для вычисления \"" + fm.methodName()
-                        + "\" нажмите \"" + fm.methodShortName() + "\"");
+                System.out.printf("Для вычисления \"%s\" нажмите \"%s\" \n"
+                        , fm.methodName(), fm.methodShortName());
             }
-            System.out.println(TEXT_EXIT);
         }
+        System.out.println(TEXT_EXIT);
     }
 }
 
