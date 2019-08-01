@@ -13,10 +13,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
 
@@ -46,7 +43,7 @@ public class Main {
      */
     static {
         try {
-            // берем только файлы с расширением REGEX  и проверяем что нужный класс реализует интерфейс Figure
+            // берем только файлы с расширением "REGEX" и проверяем что нужный класс реализует интерфейс Figure
             Path[] paths = Files.list(Paths.get(FIGURE_CLASS_PATH)).
                     filter(p -> p.getFileName().toString().endsWith(REGEX) &&
                             Figure.class.isAssignableFrom(getFigureClass(p.getFileName().toString().split(REGEX)[0])))
@@ -75,11 +72,10 @@ public class Main {
      * @return тру, если найдена хотя бы 1 аннотация annotationClass
      */
     private static boolean isHaveAnnotation(Method[] methods, Class<? extends Annotation> annotationClass) {
-        int count = 0;
         for (Method m : methods) {
-            if (m.isAnnotationPresent(annotationClass)) count++;
+            if (m.isAnnotationPresent(annotationClass)) return true;
         }
-        return count > 0;
+        return false;
     }
 
     /**
@@ -90,11 +86,10 @@ public class Main {
      * @return тру, если найдена хотя бы 1 аннотация annotationClass
      */
     private static boolean isHaveAnnotation(Field[] fields, Class<? extends Annotation> annotationClass) {
-        int count = 0;
         for (Field f : fields) {
-            if (f.isAnnotationPresent(annotationClass)) count++;
+            if (f.isAnnotationPresent(annotationClass)) return true;
         }
-        return count > 0;
+        return false;
     }
 
     static Scanner scanner;
@@ -190,8 +185,9 @@ public class Main {
                         return null;
                     }
                 }
+                c++;
             }
-            c++;
+
         }
         return param;
     }
@@ -207,8 +203,8 @@ public class Main {
     void calculate(Object figure) throws InvocationTargetException, IllegalAccessException {
         String s;
         HashMap<String, Method> figureMethods = new HashMap<>();
-        Method[] methods = Arrays.stream(figure.getClass().getDeclaredMethods())
-                .filter(m -> m.isAnnotationPresent(FigureMainMethod.class)).toArray(Method[]::new);
+        List<Method> methods = Arrays.asList(figure.getClass().getDeclaredMethods());
+        methods.forEach(m -> m.isAnnotationPresent(FigureMainMethod.class));
         for (Method method : methods) {
             FigureMainMethod fm = method.getDeclaredAnnotation(FigureMainMethod.class);
             figureMethods.put(fm.methodShortName(), method);
