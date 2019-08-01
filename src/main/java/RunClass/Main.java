@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -44,10 +45,10 @@ public class Main {
     static {
         try {
             // берем только файлы с расширением "REGEX" и проверяем что нужный класс реализует интерфейс Figure
-            Path[] paths = Files.list(Paths.get(FIGURE_CLASS_PATH)).
+            List<Path> paths = Files.list(Paths.get(FIGURE_CLASS_PATH)).
                     filter(p -> p.getFileName().toString().endsWith(REGEX) &&
                             Figure.class.isAssignableFrom(getFigureClass(p.getFileName().toString().split(REGEX)[0])))
-                    .toArray(Path[]::new);
+                    .collect(Collectors.toList());
             for (Path path : paths) {
                 Class<? extends Figure> clazz = getFigureClass(path.getFileName().toString().split(REGEX)[0])
                         .asSubclass(Figure.class);
@@ -203,8 +204,8 @@ public class Main {
     void calculate(Object figure) throws InvocationTargetException, IllegalAccessException {
         String s;
         HashMap<String, Method> figureMethods = new HashMap<>();
-        List<Method> methods = Arrays.asList(figure.getClass().getDeclaredMethods());
-        methods.forEach(m -> m.isAnnotationPresent(FigureMainMethod.class));
+        List<Method> methods = Arrays.stream(figure.getClass().getDeclaredMethods())
+                .filter(m -> m.isAnnotationPresent(FigureMainMethod.class)).collect(Collectors.toList());
         for (Method method : methods) {
             FigureMainMethod fm = method.getDeclaredAnnotation(FigureMainMethod.class);
             figureMethods.put(fm.methodShortName(), method);
