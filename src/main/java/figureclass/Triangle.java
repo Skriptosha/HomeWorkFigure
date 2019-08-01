@@ -7,11 +7,13 @@ import annotation.FigureMainMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static runclass.RunClassSpring.getParam;
+
 /**
  * Треугольник
  */
-@FigureInfo(figureName = "Треугольник", figureShortName = "T", NumberOfArgs = 3)
 @Component
+@FigureInfo(figureName = "Треугольник", figureShortName = "T", NumberOfArgs = 3)
 public class Triangle implements Figure {
 
     @FigureFieldInfo(fieldName = "сторона а треугольника")
@@ -26,7 +28,9 @@ public class Triangle implements Figure {
             "их разности";
 
     @Autowired
-    public Triangle(){}
+    public Triangle(){
+        setParams(getParam());
+    }
 
     public Triangle(int ... args) {
         setParams(args);

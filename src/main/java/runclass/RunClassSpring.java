@@ -14,11 +14,12 @@ import java.util.Scanner;
 @Component
 public class RunClassSpring extends Main{
 
+    private static int[] param;
+
     @Autowired
     private Configurator configurator;
 
     void run() throws InvocationTargetException, IllegalAccessException {
-        int[] param;
         scanner = new Scanner(System.in);
         String s;
         do {
@@ -32,27 +33,31 @@ public class RunClassSpring extends Main{
                         if (Triangle.checkTriangle(param)) break;
                     } while (true);
                     Triangle.isIsosceles(param);
-                    calculate(configurator.getBean(Triangle.class, param));
+                    calculate(configurator.getBean(Triangle.class));
                     break;
                 }
                 case ("S"): {
                     if ((param = construct(Square.class)) == null) break;
-                    calculate(configurator.getBean(Square.class, param));
+                    calculate(configurator.getBean(Square.class));
                     break;
                 }
                 case ("R"): {
                     if ((param = construct(Rectangle.class)) == null) break;
                     Rectangle.isSquare(param);
-                    calculate(configurator.getBean(Rectangle.class, param));
+                    calculate(configurator.getBean(Rectangle.class));
                     break;
                 }
                 case ("C"): {
                     if ((param = construct(Circle.class)) == null) break;
-                    calculate(configurator.getBean(Circle.class, param));
+                    calculate(configurator.getBean(Circle.class));
                     break;
                 }
             }
-
         } while (!s.equalsIgnoreCase(EXIT));
+    }
+
+
+    public static int[] getParam(){
+        return param;
     }
 }

@@ -8,12 +8,13 @@ import annotation.FigureMainMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static runclass.RunClassSpring.getParam;
+
 /**
  * Прямоугольник
  */
-@FigureInfo(figureName = "Прямоугольник", figureShortName = "R", NumberOfArgs = 2)
 @Component
-//@Scope("prototype")
+@FigureInfo(figureName = "Прямоугольник", figureShortName = "R", NumberOfArgs = 2)
 public class Rectangle implements Figure {
 
     @FigureFieldInfo(fieldName = "длина прямоугольника")
@@ -23,7 +24,9 @@ public class Rectangle implements Figure {
     private int b;
 
     @Autowired
-    public Rectangle(){}
+    public Rectangle(){
+        setParams(getParam());
+    }
 
     public Rectangle(int ... args) {
         setParams(args);

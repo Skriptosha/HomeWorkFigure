@@ -8,18 +8,22 @@ import annotation.FigureMainMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static runclass.RunClassSpring.getParam;
+
 /**
  * Квадрат
  */
-@FigureInfo(figureName = "Квадрат", figureShortName = "S", NumberOfArgs = 1)
 @Component
+@FigureInfo(figureName = "Квадрат", figureShortName = "S", NumberOfArgs = 1)
 public class Square implements Figure {
 
     @FigureFieldInfo(fieldName = "сторона квадрата")
     private int a;
 
     @Autowired
-    public Square(){}
+    public Square(){
+        setParams(getParam());
+    }
 
     public Square(int... args) {
         setParams(args);
@@ -41,8 +45,6 @@ public class Square implements Figure {
     public int perimeter() {
         return 4 * a;
     }
-
-
 
     @FigureAdditionalMethod(methodName = "test")
     public static void test() {
