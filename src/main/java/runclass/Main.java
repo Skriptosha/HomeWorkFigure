@@ -1,9 +1,14 @@
-package RunClass;
+package runclass;
 
-import Annotation.FigureFieldInfo;
-import Annotation.FigureInfo;
-import Annotation.FigureMainMethod;
-import FigureClass.Figure;
+import annotation.FigureFieldInfo;
+import annotation.FigureInfo;
+import annotation.FigureMainMethod;
+import figureclass.Figure;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -14,7 +19,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
+@Configuration
+@ComponentScan(basePackages = {"figureclass", "config", "runclass"}, lazyInit = true)
 public class Main {
 
     private static HashMap<String, Class<?>> figureClasses = new HashMap<>();
@@ -23,6 +31,7 @@ public class Main {
     private static final String FIGURE_CLASS_PATH = "src\\main\\java\\" + PACKAGE;
     static final String EXIT = "Q";
     private static final String TEXT_EXIT = "Для возврата в предыдущее меню нажмите \"" + EXIT + "\"";
+    private static ApplicationContext context;
 
     /**
      * Геттер для HashMap figureClasses.
@@ -31,6 +40,11 @@ public class Main {
      */
     static HashMap<String, Class<?>> getFigureClasses() {
         return figureClasses;
+    }
+
+    @Bean
+    public ApplicationContext getContext() {
+        return context;
     }
 
     /**
@@ -65,6 +79,20 @@ public class Main {
     }
 
     /**
+     * Запуск программы, метод main
+     *
+     * @param args аргументы коммандной строки (не учитываются)
+     */
+    public static void main(String[] args) throws IllegalAccessException, InvocationTargetException, ClassNotFoundException  {
+        context = new AnnotationConfigApplicationContext(Main.class);
+        for (String beanName : context.getBeanDefinitionNames()) {
+            System.out.println(beanName);
+        }
+        context.getBean("runClassSpring", RunClassSpring.class).run();
+        //        new RunClassAnnotation().run();
+    }
+
+    /**
      * Перегруженный метод для проверки наличия аннотации у метода
      *
      * @param methods         массив методов для проверки
@@ -94,14 +122,6 @@ public class Main {
 
     static Scanner scanner;
 
-    /**
-     * Запуск программы, метод main
-     *
-     * @param args аргументы коммандной строки (не учитываются)
-     */
-    public static void main(String[] args) {
-        new RunClassAnnotation().run();
-    }
 
     /**
      * Меню выбора фигуры
@@ -123,8 +143,8 @@ public class Main {
      * Поиск класса типа Class<?> по названию класса
      * Применяется для поиска классов фигур
      *
-     * @param className название класса, должен находиться в пакете FigureClass
-     * @return класс Class<?> из пакета FigureClass
+     * @param className название класса, должен находиться в пакете figureclass
+     * @return класс Class<?> из пакета figureclass
      */
     static Class<?> getFigureClass(String className) {
         Class<?> clazz = null;
@@ -138,11 +158,11 @@ public class Main {
     }
 
     /**
-     * Получение аннотации FigureInfo класса из пакета FigureClass.
+     * Получение аннотации FigureInfo класса из пакета figureclass.
      * Использует метод getFigureClass.
      *
-     * @param className название класса, должен находиться в пакете FigureClass
-     * @return аннотация FigureInfo класса className из пакета FigureClass
+     * @param className название класса, должен находиться в пакете figureclass
+     * @return аннотация FigureInfo класса className из пакета figureclass
      */
     static FigureInfo getFigureAnnotation(String className) {
         return getFigureClass(className).getDeclaredAnnotation(FigureInfo.class);
@@ -158,7 +178,7 @@ public class Main {
      * @param figure Класс фигуры, реализующей интерфейс Figure
      * @return массив введеных пользователем значений типа int[]
      */
-    int[] construct(Class<?> figure) {
+    public int[] construct(Class<?> figure) {
         String s;
         int[] param;
         int c = 0;
@@ -203,8 +223,8 @@ public class Main {
     void calculate(Object figure) throws InvocationTargetException, IllegalAccessException {
         String s;
         HashMap<String, Method> figureMethods = new HashMap<>();
-        List<Method> methods = Arrays.asList(figure.getClass().getDeclaredMethods());
-        methods.forEach(m -> m.isAnnotationPresent(FigureMainMethod.class));
+        List<Method> methods = Arrays.stream(figure.getClass().getDeclaredMethods())
+                .filter(m -> m.isAnnotationPresent(FigureMainMethod.class)).collect(Collectors.toList());
         for (Method method : methods) {
             FigureMainMethod fm = method.getDeclaredAnnotation(FigureMainMethod.class);
             figureMethods.put(fm.methodShortName(), method);

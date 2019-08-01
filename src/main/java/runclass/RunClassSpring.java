@@ -1,24 +1,26 @@
-package RunClass;
+package runclass;
 
-import FigureClass.*;
+import config.Configurator;
+import figureclass.Circle;
+import figureclass.Rectangle;
+import figureclass.Square;
+import figureclass.Triangle;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Scanner;
 
-public class RunClassSwitch extends Main {
+@Component
+public class RunClassSpring extends Main{
 
-    /**
-     * Основной метод для вывода в консоль
-     * Выбор фигуры происходит через оператор switch
-     * Зависим от аннотаций @FigureFieldInfo и @FigureInfo в классах фигур, так как метод construct
-     * является универсальным и использует их.
-     */
-    void run() throws ClassNotFoundException, InvocationTargetException, IllegalAccessException {
+    @Autowired
+    private Configurator configurator;
+
+    void run() throws InvocationTargetException, IllegalAccessException {
         int[] param;
         scanner = new Scanner(System.in);
-        Figure figure;
         String s;
-
         do {
             help();
             s = scanner.next();
@@ -30,33 +32,27 @@ public class RunClassSwitch extends Main {
                         if (Triangle.checkTriangle(param)) break;
                     } while (true);
                     Triangle.isIsosceles(param);
-                    figure = new Triangle(param);
-                    calculate(figure);
+                    calculate(configurator.getBean(Triangle.class, param));
                     break;
                 }
                 case ("S"): {
                     if ((param = construct(Square.class)) == null) break;
-                    figure = new Square(param);
-                    calculate(figure);
+                    calculate(configurator.getBean(Square.class, param));
                     break;
                 }
                 case ("R"): {
                     if ((param = construct(Rectangle.class)) == null) break;
                     Rectangle.isSquare(param);
-                    figure = new Rectangle(param);
-                    calculate(figure);
+                    calculate(configurator.getBean(Rectangle.class, param));
                     break;
                 }
                 case ("C"): {
                     if ((param = construct(Circle.class)) == null) break;
-                    figure = new Circle(param);
-                    calculate(figure);
+                    calculate(configurator.getBean(Circle.class, param));
                     break;
                 }
             }
 
         } while (!s.equalsIgnoreCase(EXIT));
     }
-
-
 }

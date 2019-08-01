@@ -1,15 +1,19 @@
-package FigureClass;
+package figureclass;
 
 
-import Annotation.FigureAdditionalMethod;
-import Annotation.FigureFieldInfo;
-import Annotation.FigureInfo;
-import Annotation.FigureMainMethod;
+import annotation.FigureAdditionalMethod;
+import annotation.FigureFieldInfo;
+import annotation.FigureInfo;
+import annotation.FigureMainMethod;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Прямоугольник
  */
 @FigureInfo(figureName = "Прямоугольник", figureShortName = "R", NumberOfArgs = 2)
+@Component
+//@Scope("prototype")
 public class Rectangle implements Figure {
 
     @FigureFieldInfo(fieldName = "длина прямоугольника")
@@ -18,7 +22,15 @@ public class Rectangle implements Figure {
     @FigureFieldInfo(fieldName = "ширина прямоугольника")
     private int b;
 
+    @Autowired
+    public Rectangle(){}
+
     public Rectangle(int ... args) {
+        setParams(args);
+    }
+
+    @Override
+    public void setParams(int... args) {
         if (args.length < 3) {
             this.a = args[0];
             this.b = args[1];
@@ -36,6 +48,8 @@ public class Rectangle implements Figure {
     public int perimeter() {
         return 2*(a + b);
     }
+
+
 
     @FigureAdditionalMethod(methodName = "isSquare")
     public static void isSquare(int ... args){

@@ -1,6 +1,6 @@
-package RunClass;
+package runclass;
 
-import Annotation.FigureAdditionalMethod;
+import annotation.FigureAdditionalMethod;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;

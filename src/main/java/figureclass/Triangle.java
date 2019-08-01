@@ -1,14 +1,17 @@
-package FigureClass;
+package figureclass;
 
-import Annotation.FigureAdditionalMethod;
-import Annotation.FigureFieldInfo;
-import Annotation.FigureInfo;
-import Annotation.FigureMainMethod;
+import annotation.FigureAdditionalMethod;
+import annotation.FigureFieldInfo;
+import annotation.FigureInfo;
+import annotation.FigureMainMethod;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Треугольник
  */
 @FigureInfo(figureName = "Треугольник", figureShortName = "T", NumberOfArgs = 3)
+@Component
 public class Triangle implements Figure {
 
     @FigureFieldInfo(fieldName = "сторона а треугольника")
@@ -22,12 +25,11 @@ public class Triangle implements Figure {
             "меньше суммы двух других сторон и больше\n" +
             "их разности";
 
+    @Autowired
+    public Triangle(){}
+
     public Triangle(int ... args) {
-        if (args.length > 3) {
-            this.a = args[0];
-            this.b = args[1];
-            this.c = args[2];
-        } else throw new ArrayIndexOutOfBoundsException("Для конструктора необходимо 3 параметра!");
+        setParams(args);
     }
 
     @Override
@@ -42,6 +44,16 @@ public class Triangle implements Figure {
     public int perimeter() {
         return a + b + c;
     }
+
+    @Override
+    public void setParams(int... args) {
+        if (args.length > 3) {
+            this.a = args[0];
+            this.b = args[1];
+            this.c = args[2];
+        } else throw new ArrayIndexOutOfBoundsException("Для конструктора необходимо 3 параметра!");
+    }
+
 
     /**
      * Проверяем введеные стороны на возможность построения из них треугольника
