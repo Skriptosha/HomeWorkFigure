@@ -58,10 +58,10 @@ public class Main {
     static {
         try {
             // берем только файлы с расширением "REGEX" и проверяем что нужный класс реализует интерфейс Figure
-            Path[] paths = Files.list(Paths.get(FIGURE_CLASS_PATH)).
+            List<Path> paths = Files.list(Paths.get(FIGURE_CLASS_PATH)).
                     filter(p -> p.getFileName().toString().endsWith(REGEX) &&
                             Figure.class.isAssignableFrom(getFigureClass(p.getFileName().toString().split(REGEX)[0])))
-                    .toArray(Path[]::new);
+                    .collect(Collectors.toList());
             for (Path path : paths) {
                 Class<? extends Figure> clazz = getFigureClass(path.getFileName().toString().split(REGEX)[0])
                         .asSubclass(Figure.class);
@@ -85,9 +85,6 @@ public class Main {
      */
     public static void main(String[] args) throws IllegalAccessException, InvocationTargetException, ClassNotFoundException  {
         context = new AnnotationConfigApplicationContext(Main.class);
-        for (String beanName : context.getBeanDefinitionNames()) {
-            System.out.println(beanName);
-        }
         context.getBean("runClassSpring", RunClassSpring.class).run();
         //        new RunClassAnnotation().run();
     }

@@ -6,6 +6,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class RunClassAnnotation extends Main {
     private final String BAD_RETURN_TYPE = "Метод должен иметь возвращаемый тип boolean или void";
@@ -31,10 +33,10 @@ public class RunClassAnnotation extends Main {
                     int[] param = null;
                     Class<?> clazz = getFigureClasses().get(s);
                     // фильтруем массив по методам с возвращаемым типом boolean
-                    Method[] blockMethods = Arrays.stream(clazz.getDeclaredMethods())
+                    List<Method> blockMethods = Arrays.stream(clazz.getDeclaredMethods())
                             .filter(m -> (m.isAnnotationPresent(AnnoForRunMethod)
                                     && m.getReturnType().equals(boolean.class)))
-                            .toArray(Method[]::new);
+                            .collect(Collectors.toList());
 
                     for (Method m : blockMethods) {
                         do {
@@ -44,10 +46,10 @@ public class RunClassAnnotation extends Main {
                     }
 
                     // фильтруем массив по методам с возвращаемым типом void
-                    Method[] voidMethods = Arrays.stream(clazz.getDeclaredMethods())
+                    List<Method> voidMethods = Arrays.stream(clazz.getDeclaredMethods())
                             .filter(m -> (m.isAnnotationPresent(AnnoForRunMethod)
                                     && m.getReturnType().equals(void.class)))
-                            .toArray(Method[]::new);
+                            .collect(Collectors.toList());
 
                     for (Method m : voidMethods) {
                         param = param == null ? construct(clazz) : param;
